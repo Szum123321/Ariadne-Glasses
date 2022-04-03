@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "ariadne_glasses",
+  "version": "${version}",
+  "name": "Ariadne Glasses",
+  "description": "",
+  "authors": [
+    "Szum123321"
+  ],
+  "contact": {},
+  "license": "LGPL-3.0",
+  "icon": "assets/ariadne_glasses/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.szum123321.ariadne_glasses.client.AriadneGlassesClient"
+    ],
+    "main": [
+      "net.szum123321.ariadne_glasses.AriadneGlasses"
+    ],
+    "cardinal-components-entity": [
+      "net.szum123321.ariadne_glasses.AriadneGlasses"
+    ]
+  },
+  "mixins": [
+    "ariadne_glasses.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "fabric": "*",
+    "minecraft": "1.18.*"
+  },
+  "custom": {
+    "cardinal-components": [
+      "ariadne_glasses:step_map"
+    ]
+  }
+}

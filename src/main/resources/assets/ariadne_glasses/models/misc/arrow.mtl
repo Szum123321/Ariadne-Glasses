@@ -1,0 +1,6 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl arrow_material
+emissive true
+texture minecraft:block/diamond_block
