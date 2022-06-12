@@ -5,9 +5,9 @@ import net.minecraft.util.math.BlockPos;
 import java.util.stream.IntStream;
 
 /**
- * Relatively simple Octree(https://en.wikipedia.org/wiki/Octree) implementation optimized for low memory footprint
+ * Relatively simple <a href="https://en.wikipedia.org/wiki/Octree">Octree</a> implementation optimized for low memory footprint
  */
-class LinkedOctree implements Octreee {
+class OctreeImpl implements Octreee {
     private Cuboid baseCuboid = null;
     private Node root = null;
 

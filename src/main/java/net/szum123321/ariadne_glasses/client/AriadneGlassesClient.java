@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.BakedModel;
@@ -28,7 +27,6 @@ import net.minecraft.util.math.Vec3f;
 import net.szum123321.ariadne_glasses.AriadneGlasses;
 import net.szum123321.ariadne_glasses.component.StepMapComponent;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 @Environment(EnvType.CLIENT)
 public class AriadneGlassesClient implements ClientModInitializer {
@@ -94,8 +92,8 @@ public class AriadneGlassesClient implements ClientModInitializer {
                         ctx.matrixStack().multiply(Vec3f.POSITIVE_Y.getRadialQuaternion((float) ( MathHelper.HALF_PI - MathHelper.atan2(dz, dx))));
                         ctx.matrixStack().multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) ( MathHelper.HALF_PI + Math.atan(dy * MathHelper.fastInverseSqrt(dx*dx + dz*dz)) + theta )));
                     } else {
-                        ctx.matrixStack().multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180));
                         ctx.matrixStack().multiply(Vec3f.NEGATIVE_Y.getDegreesQuaternion(ctx.world().getTime() + ctx.tickDelta()));
+                        ctx.matrixStack().multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180));
                     }
 
                     //ctx.consumers().getBuffer(RenderLayer.getTranslucent())
@@ -128,9 +126,8 @@ public class AriadneGlassesClient implements ClientModInitializer {
                 MinecraftClient client = MinecraftClient.getInstance();
                 String text = "Time Left: " + (int)resetTimer;
 
-                int w = client.getWindow().getScaledWidth(), h = client.getWindow().getScaledHeight();
-
-                int n = client.textRenderer.getWidth(text);
+                int w = client.getWindow().getScaledWidth(), h = client.getWindow().getScaledHeight(),
+                        n = client.textRenderer.getWidth(text);
 
                 client.textRenderer.draw(matrixStack, text, (float) (w / 2 - n / 2), (float) (h - 60), 0xFFFFFF);
             }

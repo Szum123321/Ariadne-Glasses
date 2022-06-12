@@ -74,13 +74,13 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
 
         clean = false;
 
-        Vec3f pos = VecfUtil.cast(player.getPos());
-        Vec3f lastPos = (stepList.size() > 0 ? stepList.get(stepList.size() - 1): new Vec3f(0, -100000, 0));
-
         if (--fullSyncCountdown <= 0) {
             fullSyncCountdown = fullSyncInterval;
             doFullSync = true;
         }
+
+        Vec3f pos = VecfUtil.cast(player.getPos());
+        Vec3f lastPos = (stepList.size() > 0 ? stepList.get(stepList.size() - 1): new Vec3f(0, -100000, 0));
 
         if ( VecfUtil.distanceSquared(lastPos, pos) >= squared(AriadneGlasses.STEP_RADIUS.get()) ) {
             stepMap.query(pos, AriadneGlasses.STEP_RADIUS.get())
@@ -190,6 +190,7 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
     private enum SyncPacketType {
         PARTIAL(1),
         COMPLETE(2),
+        HASH_SYNC(3),
         NULL(0);
 
         private final byte type;

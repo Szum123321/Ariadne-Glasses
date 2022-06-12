@@ -25,6 +25,6 @@ public interface Octreee {
     }
 
     static Octreee newOctree() {
-        return new LinkedOctree();
+        return new OctreeImpl();
     }
 }
