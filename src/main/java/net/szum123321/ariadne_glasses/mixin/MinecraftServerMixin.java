@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MinecraftServerMixin {
     @Shadow @Final protected SaveProperties saveProperties;
 
-    @Inject(method = "setDifficulty", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/SaveProperties;setDifficulty(Lnet/minecraft/world/Difficulty;)V"))
+    @Inject(method = "setDifficulty", at = @At(value = "TAIL"))
     void onDifficultySet(Difficulty difficulty, boolean forceUpdate, CallbackInfo ci) {
         DifficultySetCallback.EVENT.invoker().onDifficultySet((MinecraftServer)(Object)this, saveProperties.isHardcore() ? Difficulty.HARD : difficulty);
     }
