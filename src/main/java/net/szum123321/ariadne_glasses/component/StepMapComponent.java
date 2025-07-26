@@ -1,27 +1,30 @@
 package net.szum123321.ariadne_glasses.component;
 
-import dev.onyxstudios.cca.api.v3.component.Component;
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
-import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.registry.RegistryWrapper;
+import org.ladysnake.cca.api.v3.component.Component;
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
+import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtIntArray;
+import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.Vec3d;
 import net.szum123321.ariadne_glasses.AriadneGlasses;
 import net.szum123321.ariadne_glasses.VecfUtil;
 import net.szum123321.ariadne_glasses.data.Octreee;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Stream;
 
 /*
     This class keep track of all the data for the given player
-    The list of steps is stored in stepList as Vec3f, while stepMap quickly finds repeats and does client-side occlusion
+    The list of steps is stored in stepList as Vec3d, while stepMap quickly finds repeats and does client-side occlusion
  */
 public class StepMapComponent implements Component, AutoSyncedComponent, ServerTickingComponent {
     private final static int fullSyncInterval = 1200; //ticks
@@ -29,7 +32,7 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
     private final PlayerEntity player;
 
     private Octreee stepMap = Octreee.newOctree();
-    private final List<Vec3f> stepList = new Vector<>();
+    private final List<Vec3d> stepList = new Vector<>();
 
     private int popIndex = -1;
     private boolean doFullSync = true;
@@ -44,7 +47,7 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
         return stepMap;
     }
 
-    public List<Vec3f> getStepList() {
+    public List<Vec3d> getStepList() {
         return stepList;
     }
 
@@ -79,8 +82,8 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
             doFullSync = true;
         }
 
-        Vec3f pos = VecfUtil.cast(player.getPos());
-        Vec3f lastPos = (stepList.size() > 0 ? stepList.get(stepList.size() - 1): new Vec3f(0, -100000, 0));
+        Vec3d pos = player.getPos();
+        Vec3d lastPos = (stepList.isEmpty() ? new Vec3d(0, -100000, 0): stepList.get(stepList.size() - 1));
 
         if ( VecfUtil.distanceSquared(lastPos, pos) >= squared(AriadneGlasses.STEP_RADIUS.get()) ) {
             stepMap.query(pos, AriadneGlasses.STEP_RADIUS.get())
@@ -99,14 +102,14 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
     }
 
     @Override
-    public void writeSyncPacket(PacketByteBuf buf, ServerPlayerEntity recipient) {
+    public void writeSyncPacket(RegistryByteBuf buf, ServerPlayerEntity recipient) {
         if(!recipient.equals(player)) return;
 
         if(doFullSync) {
             buf.writeByte(SyncPacketType.COMPLETE.getID());
 
             buf.writeVarInt(stepList.size());
-            for(Vec3f i: stepList) VecfUtil.writeToByteBuf(i, buf);
+            for(Vec3d i: stepList) VecfUtil.writeToByteBuf(i, buf);
             doFullSync = false;
         } else {
             buf.writeByte(SyncPacketType.PARTIAL.getID());
@@ -125,7 +128,7 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void applySyncPacket(PacketByteBuf buf) {
+    public void applySyncPacket(RegistryByteBuf buf) {
         switch (SyncPacketType.fromByte(buf.readByte())) {
             case PARTIAL -> {
                 int k = buf.readVarInt();
@@ -134,7 +137,7 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
                 for (int i = stepList.size() - 1; i > k; i--) stepMap.remove(stepList.remove(i));
 
                 for (int i = 0; i < n; i++) {
-                    Vec3f pos = VecfUtil.readFromByteBuf(buf);
+                    Vec3d pos = VecfUtil.readFromByteBuf(buf);
                     stepMap.insert(pos, stepList.size());
                     stepList.add(pos);
                 }
@@ -155,26 +158,26 @@ public class StepMapComponent implements Component, AutoSyncedComponent, ServerT
     }
 
     @Override
-    public void writeToNbt(NbtCompound tag) {
-        int[] arr = stepList.stream()
+    public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+        long[] arr = stepList.stream()
                 .flatMap(v -> Stream.of(v.getX(), v.getY(), v.getZ()))
-                .mapToInt(Float::floatToIntBits)
+                .mapToLong(Double::doubleToLongBits)
                 .toArray();
 
-        tag.put("stepList", new NbtIntArray(arr));
+        tag.put("stepList", new NbtLongArray(arr));
     }
 
     @Override
-    public void readFromNbt(NbtCompound tag) {
-        int[] arr = tag.getIntArray("stepList");
+    public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+        long[] arr = tag.getLongArray("stepList");
 
         stepList.clear();
 
         for(int i = 0; i < arr.length / 3; i++) {
-            stepList.add(new Vec3f(
-                    Float.intBitsToFloat(arr[3*i]),
-                    Float.intBitsToFloat(arr[3*i + 1]),
-                    Float.intBitsToFloat(arr[3*i + 2])
+            stepList.add(new Vec3d(
+                    Double.longBitsToDouble(arr[3*i]),
+                    Double.longBitsToDouble(arr[3*i + 1]),
+                    Double.longBitsToDouble(arr[3*i + 2])
             ));
         }
 

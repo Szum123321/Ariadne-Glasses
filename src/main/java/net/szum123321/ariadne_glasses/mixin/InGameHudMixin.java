@@ -1,6 +1,7 @@
 package net.szum123321.ariadne_glasses.mixin;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
 import net.szum123321.ariadne_glasses.client.OverlayRenderCallback;
@@ -24,7 +25,7 @@ public abstract class InGameHudMixin {
     @Shadow private int scaledHeight;
 
     @Inject(method = "render", at = @At(value = "FIELD", ordinal = 0, opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/gui/hud/InGameHud;client:Lnet/minecraft/client/MinecraftClient;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderPortalOverlay(F)V")))
-    public void overlay(MatrixStack matrixStack, float tickDelta, CallbackInfo callbackInfo) {
-        OverlayRenderCallback.EVENT.invoker().onOverlayRender(matrixStack, tickDelta, client, scaledWidth, scaledHeight);
+    public void overlay(DrawContext context, float tickDelta, CallbackInfo ci) {
+        ///OverlayRenderCallback.EVENT.invoker().onOverlayRender(matrixStack, tickDelta, client, scaledWidth, scaledHeight);
     }
 }

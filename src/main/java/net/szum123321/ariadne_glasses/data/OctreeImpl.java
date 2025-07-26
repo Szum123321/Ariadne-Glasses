@@ -304,9 +304,7 @@ class OctreeImpl implements Octreee {
     // -3 / 2 = -2
     private static int div_2_floor(int n) {
         if(n >= 0) return n >> 1;
-        else {
-            return (n / 2) - (n & 1);
-        }
+        else return (n / 2) - (n & 1);
     }
 
     private static int squared(int n) {

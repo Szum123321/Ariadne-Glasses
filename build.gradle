@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -17,17 +17,19 @@ repositories {
         url = "https://maven.terraformersmc.com/"
     }
     maven { url "https://maven.shedaniel.me/" }
+
     maven {
-        name = "Ladysnake Libs"
-        url = "https://ladysnake.jfrog.io/artifactory/mods"
+        name = 'Ladysnake Mods'
+        url = 'https://maven.ladysnake.org/releases'
     }
-    maven {
+
+    /*maven {
         name = "Gegy's Maven"
         url = "https://maven.gegy.dev/"
-    }
+    }*/
     maven { url 'https://jitpack.io' }
 
-    maven { url = "https://hephaestus.dev/release" }
+    //maven { url = "https://hephaestus.dev/release" }
     mavenCentral()
 
 }
@@ -44,25 +46,17 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "dev.emi:trinkets:${project.trinkets_version}"
+    //modImplementation "dev.emi:trinkets:${project.trinkets_version}"
 
-    //modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cardinal_components_version}"
-    //modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cardinal_components_version}"
-    //modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-util:${project.cardinal_components_version}"
-
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
     // Adds a dependency on a specific module
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
     // Includes Cardinal Components API as a Jar-in-Jar dependency (optional)
-    include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
-    include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
-/*
-    modRuntime("com.github.astei:lazydfu:${project.lazydfu_version}") {
-        exclude(module: "fabric-loader")
-    }
-*/
-    modImplementation "dev.monarkhes:myron:${project.myron_version}"
-    include "dev.monarkhes:myron:${project.myron_version}"
+    include "org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cardinal_components_version}"
+    include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cardinal_components_version}"
+
+    //include modImplementation("com.github.0x3C50:Renderer:master-SNAPSHOT")
+    include modImplementation("io.github.0x3c50.renderer:renderer-fabric:1.2.2")
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -70,11 +64,24 @@ dependencies {
 
     //Mod menu
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-
-    /*modRuntime ("supercoder79:databreaker:${project.databreaker_version}") {
-        exclude module: "fabric-loader"
-    }*/
 }
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
+
 
 processResources {
     inputs.property "version", project.version
