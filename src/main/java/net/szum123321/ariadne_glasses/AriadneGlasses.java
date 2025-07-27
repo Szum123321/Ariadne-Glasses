@@ -1,6 +1,8 @@
 package net.szum123321.ariadne_glasses;
 
 import net.fabricmc.fabric.api.item.v1.FabricItem;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.szum123321.ariadne_glasses.network.AriadneResetPacket;
 import org.ladysnake.cca.api.v3.component.*;
 import org.ladysnake.cca.api.v3.entity.*;
 import net.fabricmc.api.ModInitializer;
@@ -28,13 +30,14 @@ public class AriadneGlasses implements ModInitializer, EntityComponentInitialize
     public void onInitialize() {
         Registry.register(Registries.ITEM, new Identifier(MOD_ID, "glasses"), GLASSES);
 
+        PayloadTypeRegistry.playC2S().register(AriadneResetPacket.ID, AriadneResetPacket.CODEC);
+
         ServerLifecycleEvents.SERVER_STARTED.register(server -> STEP_RADIUS.set((server.getSaveProperties().getDifficulty().getId() + 1) * 2));
 
         DifficultySetCallback.EVENT.register((server, difficulty) -> STEP_RADIUS.set((difficulty.getId() + 1) * 2));
 
-        ServerPlayNetworking.registerGlobalReceiver(ARIADNE_RESET_PACKET,
-                (server, player, handler, buf, responseSender) -> server.execute(() -> STEP_MAP.maybeGet(player).ifPresent(StepMapComponent::clear))
-        );
+        ServerPlayNetworking.registerGlobalReceiver(AriadneResetPacket.ID,
+                (payload, context) -> context.server().execute(() -> STEP_MAP.maybeGet(context.player()).ifPresent(StepMapComponent::clear)));
     }
 
     @Override

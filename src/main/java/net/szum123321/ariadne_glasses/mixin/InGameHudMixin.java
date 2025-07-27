@@ -20,12 +20,12 @@ public abstract class InGameHudMixin {
     @Shadow
     private MinecraftClient client;
 
-    @Shadow private int scaledWidth;
+    /*@Shadow private int scaledWidth;
 
     @Shadow private int scaledHeight;
 
     @Inject(method = "render", at = @At(value = "FIELD", ordinal = 0, opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/gui/hud/InGameHud;client:Lnet/minecraft/client/MinecraftClient;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderPortalOverlay(F)V")))
     public void overlay(DrawContext context, float tickDelta, CallbackInfo ci) {
         ///OverlayRenderCallback.EVENT.invoker().onOverlayRender(matrixStack, tickDelta, client, scaledWidth, scaledHeight);
-    }
+    }*/
 }

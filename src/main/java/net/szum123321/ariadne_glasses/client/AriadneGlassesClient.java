@@ -28,6 +28,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.szum123321.ariadne_glasses.AriadneGlasses;
 import net.szum123321.ariadne_glasses.component.StepMapComponent;
+import net.szum123321.ariadne_glasses.network.AriadneResetPacket;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
@@ -59,20 +60,21 @@ public class AriadneGlassesClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        /*ObjFile.ResourceProvider resource_rprovider = ObjFile.ResourceProvider.ofPath(Path.of("/home/szymon/Desktop/uploads_files_2935081_cc0_Arrow+5"));
+        /*ObjFile.ResourceProvider resource_provider = ObjFile.ResourceProvider.ofPath(Path.of("/home/szymon/Desktop/uploads_files_2935081_cc0_Arrow+5"));
         ObjFile obj_file;
         try {
-            obj_file = new ObjFile("Arrow5.obj", resource_rprovider);
+            obj_file = new ObjFile("Arrow5.obj", resource_provider);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }*/
 
-        var aaa = this.getClass();
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register(ctx -> {
             if(!TOGGLE_DISPLAY_KEYBINDING.isPressed() || ! hasGoggles) return;
 
-            ctx.profiler().push("Ariadne_Render");
+            MinecraftClient.getInstance().getProfiler().push("Ariadne_Render");
+
+            float tickDelta = MinecraftClient.getInstance().getTickDelta();
 
             Vec3d cameraPos = ctx.camera().getPos();
 
@@ -83,9 +85,8 @@ public class AriadneGlassesClient implements ClientModInitializer {
                     Vec3d pos = component.getStepList().get(i);
 
                     ctx.matrixStack().push();
-
                     //Deflection angle
-                    float theta = AMPLITUDE * MathHelper.sin(i * STEP_PHASE_SHIFT + (ctx.world().getTime() + ctx.tickDelta()) * FREQ);
+                    float theta = AMPLITUDE * MathHelper.sin(i * STEP_PHASE_SHIFT + (ctx.world().getTime() + tickDelta) * FREQ);
 
                     ctx.matrixStack().translate(
                             pos.getX() - cameraPos.x,
@@ -104,7 +105,7 @@ public class AriadneGlassesClient implements ClientModInitializer {
                         ctx.matrixStack().multiply(RotationAxis.POSITIVE_Y.rotation((float) (-MathHelper.atan2(dz, dx))));
                         ctx.matrixStack().multiply(RotationAxis.POSITIVE_Z.rotation((float) ( -Math.atan(dy * MathHelper.fastInverseSqrt(dx*dx + dz*dz)) + theta )));
                     } else {
-                        ctx.matrixStack().multiply(RotationAxis.NEGATIVE_Y.rotation((ctx.world().getTime() + ctx.tickDelta()) * FREQ * (float)(-Math.E)));
+                        ctx.matrixStack().multiply(RotationAxis.NEGATIVE_Y.rotation((ctx.world().getTime() + tickDelta) * FREQ * (float)(-Math.E)));
                         ctx.matrixStack().multiply(RotationAxis.POSITIVE_Z.rotation((float)Math.PI * -0.5f));
                     }
 
@@ -116,7 +117,7 @@ public class AriadneGlassesClient implements ClientModInitializer {
                     ctx.matrixStack().pop();
                 });
 
-            ctx.profiler().pop();
+            MinecraftClient.getInstance().getProfiler().pop();
         });
 
 
@@ -149,7 +150,8 @@ public class AriadneGlassesClient implements ClientModInitializer {
                 else if(resetTimer > 0) resetTimer = Math.max(0, resetTimer - (client.getLastFrameDuration() / 20.0f));
 
                 if(resetTimer == 0) {
-                    ClientPlayNetworking.send(AriadneGlasses.ARIADNE_RESET_PACKET, PacketByteBufs.empty());
+                    //ClientPlayNetworking.send(AriadneGlasses.ARIADNE_RESET_PACKET, PacketByteBufs.empty());
+                    ClientPlayNetworking.send(new AriadneResetPacket());
                     resetTimer = -2; //this way player has to release the key
                 }
             } else resetTimer = -1;
